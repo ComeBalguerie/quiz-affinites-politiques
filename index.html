@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Affinités Politiques France 2027</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 28px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .quiz-section {
+      display: none;
+    }
+    .quiz-section.active {
+      display: block;
+    }
+    .question {
+      margin-bottom: 25px;
+    }
+    .question-text {
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #333;
+      font-size: 16px;
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .option {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.2s;
+      background: #f9f9f9;
+    }
+    .option:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    .option.selected {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+    .progress {
+      margin-bottom: 30px;
+      background: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #667eea;
+      transition: width 0.3s;
+    }
+    .buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    .results {
+      display: none;
+    }
+    .results.active {
+      display: block;
+    }
+    .results-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #333;
+    }
+    .result-category {
+      margin-bottom: 40px;
+    }
+    .category-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+      color: #333;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid #ddd;
+    }
+    .result-item.high {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+    .result-item.medium {
+      border-left-color: #ff9800;
+      background: #fff8f1;
+    }
+    .result-item.low {
+      border-left-color: #f44336;
+      background: #fef1f1;
+    }
+    .result-name {
+      font-weight: 600;
+      color: #333;
+    }
+    .result-score {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    .score-bar {
+      width: 100px;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      margin-left: 15px;
+      overflow: hidden;
+    }
+    .score-fill {
+      height: 100%;
+      background: #667eea;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Affinités Politiques 2027</h1>
+    <p class="subtitle">Basé sur 7 scrutins de l'Assemblée nationale (2023)</p>
+
+    <!-- QUIZ -->
+    <div class="quiz-section active">
+      <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div id="questionsContainer"></div>
+      <div class="buttons">
+        <button class="btn-secondary" id="resetBtn">Réinitialiser</button>
+        <button class="btn-secondary" id="aboutBtn" onclick="showAbout()">À propos</button>
+        <button class="btn-primary" id="submitBtn" disabled>Voir résultats</button>
+      </div>
+    </div>
+
+    <!-- À PROPOS -->
+    <div class="results" id="aboutSection" style="display: none;">
+      <div class="results-title">À propos de ce quiz</div>
+      <div style="text-align: left; line-height: 1.8; color: #333;">
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: #667eea;">Sources officielles</h3>
+        <p>Tous les votes utilisés proviennent des scrutins publics de l'Assemblée nationale française (16e législature, 2023).</p>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: #667eea;">Les 7 scrutins</h3>
+        <ul style="margin-left: 20px;">
+          <li><strong>Immigration</strong> (scrutin 3213, 19 déc 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/3213" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>Nucléaire</strong> (scrutin 1243, 21 mars 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1243" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>Retraites</strong> (scrutin 1240, 20 mars 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1240" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>Défense/LPM</strong> (scrutin 1778, 7 juin 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1778" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>Santé</strong> (scrutin 1488, 10 mai 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1488" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>PLF 2024</strong> (scrutin 2887, 4 nov 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/2887" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+          <li><strong>Emploi</strong> (scrutin 2965, 14 nov 2023) — <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/2965" target="_blank" style="color: #667eea;">assemblee-nationale.fr</a></li>
+        </ul>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: #667eea;">Méthodologie</h3>
+        <p>Les affinités sont calculées sur la base du pourcentage de votes alignés avec vos réponses, pour chaque scrutin. Aucune manipulation de données.</p>
+        
+        <h3 style="margin-top: 20px; margin-bottom: 10px; color: #667eea;">Disclaimer</h3>
+        <p style="font-size: 13px; color: #888;">Ce quiz est informatif et à titre personnel. Il ne remplace pas les positions officielles des partis politiques.</p>
+      </div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="closeAbout()">Retour</button>
+      </div>
+    </div>
+
+    <!-- RÉSULTATS -->
+    <div class="results">
+      <div class="results-title">Vos affinités politiques</div>
+      <div class="result-category">
+        <div class="category-title">Partis parlementaires</div>
+        <div id="partisResults"></div>
+      </div>
+      <div class="result-category">
+        <div class="category-title">Personnalités politiques</div>
+        <div id="personnagesResults"></div>
+      </div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="location.reload()">Recommencer</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <strong>Sources officielles :</strong> Votes Assemblée nationale (16e législature 2023) — 
+    <a href="https://www.assemblee-nationale.fr" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 500;">assemblee-nationale.fr</a><br>
+    <span style="margin-top: 8px; display: block; font-size: 11px;">
+      Scrutins : 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/3213" target="_blank" style="color: #667eea;">3213 (Immigration)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1243" target="_blank" style="color: #667eea;">1243 (Nucléaire)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1240" target="_blank" style="color: #667eea;">1240 (Retraites)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1778" target="_blank" style="color: #667eea;">1778 (Défense)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/1488" target="_blank" style="color: #667eea;">1488 (Santé)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/2887" target="_blank" style="color: #667eea;">2887 (PLF)</a> | 
+      <a href="https://www.assemblee-nationale.fr/dyn/16/scrutins/2965" target="_blank" style="color: #667eea;">2965 (Emploi)</a>
+    </span>
+    <span style="margin-top: 8px; display: block;">
+      <a href="SOURCES.md" target="_blank" style="color: #667eea; font-weight: 500;">Voir détails complets des sources</a>
+    </span>
+    <span style="margin-top: 10px; display: block;">Créé par <a href="https://comebalguerie.com" target="_blank" style="color: #667eea; font-weight: 500;">Côme Balguerie</a></span>
+  </footer>
+
+  <script src="votes_data.js"></script>
+  <script>
+    const reponses = new Array(7).fill(null);
+    const questions = [
+      { scrutin: 0, text: "Êtes-vous pour ou contre la restriction de l'immigration?" },
+      { scrutin: 1, text: "Êtes-vous pour ou contre la promotion du nucléaire?" },
+      { scrutin: 2, text: "Êtes-vous pour ou contre l'augmentation de l'âge de la retraite?" },
+      { scrutin: 3, text: "Êtes-vous pour ou contre l'augmentation des dépenses militaires?" },
+      { scrutin: 4, text: "Êtes-vous pour ou contre les initiatives concernant la santé?" },
+      { scrutin: 5, text: "Êtes-vous pour ou contre le projet de loi de finances?" },
+      { scrutin: 6, text: "Êtes-vous pour ou contre les politiques d'emploi?" }
+    ];
+
+    function renderQuestions() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = questions.map((q, idx) => `
+        <div class="question">
+          <div class="question-text">${idx + 1}. ${q.text}</div>
+          <div class="options">
+            <div class="option" data-question="${idx}" data-response="pour">Pour</div>
+            <div class="option" data-question="${idx}" data-response="abstention">Abstention</div>
+            <div class="option" data-question="${idx}" data-response="contre">Contre</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          const qIdx = parseInt(opt.dataset.question);
+          const response = opt.dataset.response;
+          reponses[qIdx] = response;
+          
+          document.querySelectorAll(`[data-question="${qIdx}"]`).forEach(o => o.classList.remove('selected'));
+          opt.classList.add('selected');
+          
+          updateProgress();
+          updateSubmitButton();
+        });
+      });
+    }
+
+    function updateProgress() {
+      const answered = reponses.filter(r => r !== null).length;
+      const percent = (answered / 7) * 100;
+      document.getElementById('progressBar').style.width = percent + '%';
+    }
+
+    function updateSubmitButton() {
+      const allAnswered = reponses.every(r => r !== null);
+      document.getElementById('submitBtn').disabled = !allAnswered;
+    }
+
+    function showResults() {
+      document.querySelector('.quiz-section').classList.remove('active');
+      document.querySelector('.results').classList.add('active');
+
+      // Résultats partis
+      const partisScores = Object.keys(GROUPES).map(parti => ({
+        nom: GROUPES[parti].label,
+        score: calculerAffiniteParti(reponses, parti),
+        couleur: GROUPES[parti].couleur
+      })).sort((a, b) => b.score - a.score);
+
+      const partisHtml = partisScores.map(p => `
+        <div class="result-item ${p.score >= 70 ? 'high' : p.score >= 40 ? 'medium' : 'low'}">
+          <div class="result-name">${p.nom}</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="score-bar"><div class="score-fill" style="width: ${p.score}%"></div></div>
+            <div class="result-score">${p.score}%</div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('partisResults').innerHTML = partisHtml;
+
+      // Résultats personnages
+      const persos = new Set();
+      SCRUTINS.forEach(s => Object.keys(s.personnages).forEach(p => persos.add(p)));
+      
+      const persoScores = Array.from(persos).map(perso => ({
+        nom: perso,
+        score: calculerAffinitePersonnage(reponses, perso)
+      })).filter(p => p.score > 0).sort((a, b) => b.score - a.score).slice(0, 15);
+
+      const persoHtml = persoScores.map(p => `
+        <div class="result-item ${p.score >= 80 ? 'high' : p.score >= 50 ? 'medium' : 'low'}">
+          <div class="result-name">${p.nom}</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="score-bar"><div class="score-fill" style="width: ${p.score}%"></div></div>
+            <div class="result-score">${p.score}%</div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('personnagesResults').innerHTML = persoHtml;
+    }
+
+    function showAbout() {
+      document.querySelector('.quiz-section').classList.remove('active');
+      document.getElementById('aboutSection').style.display = 'block';
+    }
+
+    function closeAbout() {
+      document.querySelector('.quiz-section').classList.add('active');
+      document.getElementById('aboutSection').style.display = 'none';
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', showResults);
+    document.getElementById('resetBtn').addEventListener('click', () => location.reload());
+
+    renderQuestions();
+  </script>
+</body>
+</html>
