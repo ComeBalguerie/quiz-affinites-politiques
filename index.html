@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Affinités Politiques 2027</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    /* ÉCRAN D'ACCUEIL */
+    .welcome-screen {
+      background: white;
+      border-radius: 16px;
+      padding: 60px 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      display: none;
+    }
+    
+    .welcome-screen.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+    
+    .welcome-screen h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .welcome-screen .subtitle {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    
+    .welcome-screen .description {
+      font-size: 14px;
+      color: #888;
+      max-width: 500px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    
+    .btn-start {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 16px 48px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* QUIZ */
+    .quiz-screen {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      display: none;
+    }
+    
+    .quiz-screen.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+    
+    .progress-section {
+      margin-bottom: 40px;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s;
+    }
+    
+    .progress-text {
+      font-size: 12px;
+      color: #999;
+      text-align: right;
+    }
+    
+    .question-container {
+      margin: 60px 0;
+    }
+    
+    .question-number {
+      font-size: 14px;
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .question-text {
+      font-size: 24px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    
+    .question-context {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 30px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .context-icon {
+      color: #667eea;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .option-btn {
+      padding: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: #f9f9f9;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      transition: all 0.2s;
+      line-height: 1.3;
+    }
+    
+    .option-btn:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+    
+    .option-btn.selected {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 50px;
+    }
+    
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+    
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* RÉSULTATS */
+    .results-screen {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      display: none;
+    }
+    
+    .results-screen.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+    
+    .results-title {
+      font-size: 32px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 40px;
+      color: #333;
+    }
+    
+    .podium {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: 20px;
+      margin-bottom: 60px;
+      align-items: flex-end;
+    }
+    
+    .podium-item {
+      text-align: center;
+    }
+    
+    .podium-item.first {
+      order: 2;
+    }
+    
+    .podium-item.second {
+      order: 1;
+    }
+    
+    .podium-item.third {
+      order: 3;
+    }
+    
+    .medal {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-weight: 600;
+      font-size: 28px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .podium-item.first .avatar {
+      width: 100px;
+      height: 100px;
+      font-size: 36px;
+    }
+    
+    .podium-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .podium-group {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 12px;
+    }
+    
+    .podium-score {
+      font-size: 24px;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .ranking-section {
+      margin-bottom: 50px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #667eea;
+      color: #333;
+    }
+    
+    .ranking-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 4px solid #ddd;
+    }
+    
+    .ranking-item.high {
+      border-left-color: #4caf50;
+      background: #f1f8f4;
+    }
+    
+    .ranking-item.medium {
+      border-left-color: #ff9800;
+      background: #fff8f1;
+    }
+    
+    .ranking-item.low {
+      border-left-color: #f44336;
+      background: #fef1f1;
+    }
+    
+    .rank-avatar-small {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 12px;
+      color: white;
+      flex-shrink: 0;
+    }
+    
+    .ranking-info {
+      flex: 1;
+    }
+    
+    .ranking-name {
+      font-weight: 600;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    .ranking-group {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .ranking-score {
+      font-size: 18px;
+      font-weight: 700;
+      color: #667eea;
+      min-width: 50px;
+      text-align: right;
+    }
+    
+    .disclaimer {
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+    
+    footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+    
+    footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+    
+    footer a:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @media (max-width: 600px) {
+      .options { grid-template-columns: 1fr; }
+      .podium { grid-template-columns: 1fr; }
+      .podium-item { order: auto !important; }
+      .quiz-screen { padding: 20px; }
+      .welcome-screen { padding: 40px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- ACCUEIL -->
+    <div class="welcome-screen active">
+      <h1>🇫🇷 Affinités Politiques 2027</h1>
+      <p class="subtitle">75 questions neutres pour vous connaître</p>
+      <p class="description">
+        Quiz basé sur les positions réelles des candidats et partis — scrutins Assemblée nationale 2023-2024 et positions publiques documentées.
+        <strong>Honnêteté totale, pas de biais gouvernement.</strong>
+      </p>
+      <button class="btn-start" id="startBtn" onclick="startQuiz()">Commencer le quiz (15 min)</button>
+      <div id="loadStatus" style="display:none;color:red;margin-top:15px;font-size:12px;"></div>
+    </div>
+    
+    <!-- QUIZ -->
+    <div class="quiz-screen">
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 / 75</div>
+      </div>
+      
+      <div class="question-container" id="questionContainer"></div>
+      
+      <div class="controls">
+        <button class="btn-secondary" onclick="goBack()">← Précédent</button>
+        <button class="btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Suivant →</button>
+      </div>
+    </div>
+    
+    <!-- RÉSULTATS -->
+    <div class="results-screen">
+      <div class="results-title">Vos Affinités Politiques</div>
+      
+      <div class="disclaimer">
+        <strong>⚠️ À savoir:</strong> Ce quiz utilise les scrutins officiels de l'Assemblée nationale (7) et les positions publiques documentées (45 questions). Les résultats reflètent les alignements politiques actuels.
+      </div>
+      
+      <div class="podium" id="podium"></div>
+      
+      <div class="ranking-section">
+        <div class="section-title">📊 Tous les partis</div>
+        <div id="partisRanking"></div>
+      </div>
+      
+      <div class="ranking-section">
+        <div class="section-title">⭐ Top 15 personnages</div>
+        <div id="persoRanking"></div>
+      </div>
+      
+      <div class="controls">
+        <button class="btn-secondary" onclick="location.reload()">🔄 Recommencer</button>
+      </div>
+      
+      <footer>
+        <strong>Sources:</strong> Votes Assemblée nationale (16e législature 2021-2024) 
+        — <a href="https://www.assemblee-nationale.fr" target="_blank">assemblee-nationale.fr</a><br>
+        <a href="https://comebalguerie.com" target="_blank">Créé par Côme Balguerie</a>
+      </footer>
+    </div>
+  </div>
+  
+  <script src="votes_data.js"></script>
+  <script src="questions_75_final.js"></script>
+  <script>
+    // Vérifier le chargement
+    window.addEventListener('load', function() {
+      const statusDiv = document.getElementById('loadStatus');
+      const startBtn = document.getElementById('startBtn');
+      
+      if (!QUESTIONS_75 || QUESTIONS_75.length === 0) {
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = '❌ Questions non chargées. Rechargez la page.';
+        startBtn.disabled = true;
+        console.error("QUESTIONS_75 missing!");
+        return;
+      }
+      if (!GROUPES || Object.keys(GROUPES).length === 0) {
+        statusDiv.style.display = 'block';
+        statusDiv.innerHTML = '❌ Données politiques non chargées. Rechargez la page.';
+        startBtn.disabled = true;
+        console.error("GROUPES missing!");
+        return;
+      }
+      console.log('✓ Toutes les données chargées');
+    });
+    
+    let currentQuestion = 0;
+    let reponses = new Array(QUESTIONS_75 ? QUESTIONS_75.length : 75).fill(null);
+    
+    function startQuiz() {
+      // Attendre que tout soit chargé
+      if (!QUESTIONS_75 || QUESTIONS_75.length === 0) {
+        alert('Les questions ne sont pas chargées. Veuillez rafraîchir la page.');
+        return;
+      }
+      document.querySelector('.welcome-screen').classList.remove('active');
+      document.querySelector('.quiz-screen').classList.add('active');
+      renderQuestion();
+    }
+    
+    function renderQuestion() {
+      if (!QUESTIONS_75 || !QUESTIONS_75[currentQuestion]) {
+        console.error("Question not found at index", currentQuestion);
+        document.getElementById('questionContainer').innerHTML = '<div style="color:red;">❌ Erreur chargement question</div>';
+        return;
+      }
+      
+      const q = QUESTIONS_75[currentQuestion];
+      const container = document.getElementById('questionContainer');
+      
+      const optionsHTML = q.options.map((opt, idx) => `
+        <button class="option-btn ${reponses[currentQuestion] === idx ? 'selected' : ''}" 
+                onclick="selectOption(${idx})">
+          ${opt}
+        </button>
+      `).join('');
+      
+      container.innerHTML = `
+        <div class="question-number">Question ${currentQuestion + 1} / ${QUESTIONS_75.length}</div>
+        <div class="question-text">${q.text}</div>
+        <div class="question-context">
+          <span class="context-icon">ℹ️</span>
+          <span>${q.context}</span>
+        </div>
+        <div class="options">
+          ${optionsHTML}
+        </div>
+      `;
+      
+      updateProgress();
+    }
+    
+    function selectOption(idx) {
+      reponses[currentQuestion] = idx;
+      renderQuestion();
+      updateButtonState();
+    }
+    
+    function updateProgress() {
+      const percent = ((currentQuestion + 1) / QUESTIONS_75.length) * 100;
+      document.getElementById('progressFill').style.width = percent + '%';
+      document.getElementById('progressText').textContent = `${currentQuestion + 1} / ${QUESTIONS_75.length}`;
+    }
+    
+    function updateButtonState() {
+      document.getElementById('nextBtn').disabled = reponses[currentQuestion] === null;
+    }
+    
+    function nextQuestion() {
+      if (currentQuestion < QUESTIONS_75.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+        updateButtonState();
+      } else {
+        showResults();
+      }
+    }
+    
+    function goBack() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+        updateButtonState();
+      }
+    }
+    
+    function showResults() {
+      document.querySelector('.quiz-screen').classList.remove('active');
+      document.querySelector('.results-screen').classList.add('active');
+      
+      const partisScores = Object.keys(GROUPES).map(parti => ({
+        parti,
+        label: GROUPES[parti].label,
+        couleur: GROUPES[parti].couleur,
+        score: calculerAffiniteParti(reponses, parti)
+      })).sort((a, b) => b.score - a.score);
+      
+      const persos = new Set();
+      SCRUTINS.forEach(s => Object.keys(s.personnages).forEach(p => persos.add(p)));
+      const persoScores = Array.from(persos).map(perso => ({
+        perso,
+        score: calculerAffinitePersonnage(reponses, perso)
+      })).filter(p => p.score > 0).sort((a, b) => b.score - a.score);
+      
+      const top3 = persoScores.slice(0, 3);
+      const podiumHTML = top3.map((p, idx) => {
+        const medals = ['🥇', '🥈', '🥉'];
+        const persoData = SCRUTINS[0].personnages[p.perso];
+        const groupeData = GROUPES[persoData.groupe];
+        return `
+          <div class="podium-item ${['first', 'second', 'third'][idx]}">
+            <div class="medal">${medals[idx]}</div>
+            <div class="avatar" style="background-color: ${groupeData.couleur}">
+              ${p.perso.charAt(0)}
+            </div>
+            <div class="podium-name">${p.perso}</div>
+            <div class="podium-group">${groupeData.label}</div>
+            <div class="podium-score">${p.score}%</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('podium').innerHTML = podiumHTML;
+      
+      const partisHTML = partisScores.map(p => `
+        <div class="ranking-item ${p.score >= 70 ? 'high' : p.score >= 40 ? 'medium' : 'low'}">
+          <div class="rank-avatar-small" style="background-color: ${p.couleur}">${p.label.charAt(0)}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${p.label}</div>
+          </div>
+          <div class="ranking-score">${p.score}%</div>
+        </div>
+      `).join('');
+      document.getElementById('partisRanking').innerHTML = partisHTML;
+      
+      const persoHTML = persoScores.slice(0, 15).map(p => {
+        const persoData = SCRUTINS[0].personnages[p.perso];
+        const groupeData = GROUPES[persoData.groupe];
+        return `
+          <div class="ranking-item ${p.score >= 80 ? 'high' : p.score >= 50 ? 'medium' : 'low'}">
+            <div class="rank-avatar-small" style="background-color: ${groupeData.couleur}">${p.perso.charAt(0)}</div>
+            <div class="ranking-info">
+              <div class="ranking-name">${p.perso}</div>
+              <div class="ranking-group">${groupeData.label}</div>
+            </div>
+            <div class="ranking-score">${p.score}%</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('persoRanking').innerHTML = persoHTML;
+    }
+    
+    updateButtonState();
+    
+    // DEBUG: Vérifier que les données sont chargées
+    console.log("QUESTIONS_75 count:", QUESTIONS_75 ? QUESTIONS_75.length : "NOT LOADED");
+    console.log("GROUPES count:", GROUPES ? Object.keys(GROUPES).length : "NOT LOADED");
+    console.log("SCRUTINS count:", SCRUTINS ? SCRUTINS.length : "NOT LOADED");
+    
+    if (!QUESTIONS_75 || QUESTIONS_75.length === 0) {
+      console.error("❌ QUESTIONS_75 not loaded!");
+      document.getElementById('questionContainer').innerHTML = '<div style="color:red;padding:20px;">Erreur: Questions non chargées. Vérifiez la console.</div>';
+    }
+  </script>
+</body>
+</html>
